@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Macro Recipe Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button, select {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      width: 100%;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍽️ Generate a Custom Recipe</h1>
+
+  <form id="generateForm">
+    <input type="text" name="title" placeholder="Ingredient or dish (e.g., chicken)" />
+    <input type="text" name="ingredients" placeholder="Specific ingredients (comma separated)" />
+    <input type="text" name="diet" placeholder="Dietary restrictions (e.g., vegan, gluten-free)" />
+    <input type="number" name="minCalories" placeholder="Min Calories" />
+    <input type="number" name="maxCalories" placeholder="Max Calories" />
+    <input type="number" name="minProtein" placeholder="Min Protein (g)" />
+    <input type="number" name="maxProtein" placeholder="Max Protein (g)" />
+    <input type="number" name="minCarbs" placeholder="Min Carbs (g)" />
+    <input type="number" name="maxCarbs" placeholder="Max Carbs (g)" />
+    <input type="number" name="minFat" placeholder="Min Fat (g)" />
+    <input type="number" name="maxFat" placeholder="Max Fat (g)" />
+    <button type="submit">Generate Recipe</button>
+  </form>
+
+  <h2>📝 Result:</h2>
+  <pre id="result">Nothing yet...</pre>
+
+  <script src="script.js"></script>
+</body>
+</html>
