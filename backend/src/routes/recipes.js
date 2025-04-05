@@ -106,4 +106,84 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+const { OpenAI } = require("openai"); // Add this at the top with your other requires
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+// POST /recipes/generate
+router.post("/generate", async (req, res) => {
+    const { calories, protein, carbs, fat } = req.body;
+  
+    // 🧼 Basic validation
+    if (
+      !calories || !protein || !carbs || !fat ||
+      isNaN(calories) || isNaN(protein) || isNaN(carbs) || isNaN(fat)
+    ) {
+      return res.status(400).json({ error: "All macros must be provided as numbers." });
+    }
+  
+    const prompt = `
+    Generate a realistic recipe that meets these macros:
+    - Calories: ${calories}
+    - Protein: ${protein}g
+    - Carbs: ${carbs}g
+    - Fat: ${fat}g
+  
+    Return only a JSON object with the following fields:
+    - title
+    - ingredients (comma separated)
+    - instructions
+    - calories
+    - protein
+    - carbs
+    - fat
+    `;
+  
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+      });
+  
+      const responseText = completion.choices[0].message.content;
+      const recipe = JSON.parse(responseText);
+
+      // 🔍 Check for duplicate title (or title + instructions)
+    const existing = await db.query(
+        `SELECT * FROM recipes WHERE title = $1 AND instructions = $2`,
+        [recipe.title, recipe.instructions]
+      );
+  
+      if (existing.rows.length > 0) {
+        console.log("⚠️ Recipe already exists, skipping insert.");
+        return res.status(200).json(recipe);
+      }
+  
+      // 💾 Save to database
+      await db.query(
+        `INSERT INTO recipes (title, ingredients, instructions, calories, protein, carbs, fat)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          recipe.title,
+          recipe.ingredients,
+          recipe.instructions,
+          recipe.calories,
+          recipe.protein,
+          recipe.carbs,
+          recipe.fat
+        ]
+      );
+  
+      // 🚀 Return to client
+      res.status(201).json(recipe);
+    } catch (err) {
+      console.error("❌ OpenAI error:", err);
+      res.status(500).json({ error: "Failed to generate recipe" });
+    }
+  });
+  
+
 module.exports = router;
